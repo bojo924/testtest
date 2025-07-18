@@ -22,6 +22,9 @@ class OrderItem extends Model
         'price',
         'product_name',
         'product_image',
+        'is_custom',
+        'custom_color',
+        'custom_design_path',
     ];
 
     /**
@@ -34,6 +37,7 @@ class OrderItem extends Model
         return [
             'quantity' => 'integer',
             'price' => 'decimal:2',
+            'is_custom' => 'boolean',
         ];
     }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { AdminLayout } from '@/components/admin-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +14,12 @@ import {
     Package,
     Calendar,
     DollarSign,
-    User
+    User,
+    Palette,
+    ShoppingCart
 } from 'lucide-react';
 
-export default function AdminOrdersIndex({ orders, filters }) {
+export default function AdminOrdersIndex({ orders, filters, orderType = 'all' }) {
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [selectedStatus, setSelectedStatus] = useState(filters.status || 'all');
 
@@ -65,12 +68,33 @@ export default function AdminOrdersIndex({ orders, filters }) {
 
     return (
         <AdminLayout>
-            <Head title="Manage Orders" />
+            <Head title={
+                orderType === 'custom' ? 'Custom T-Shirt Orders' :
+                orderType === 'regular' ? 'Regular Orders' :
+                'Manage Orders'
+            } />
 
             <div className="container mx-auto px-4 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage Orders</h1>
-                    <p className="text-gray-600">View and manage customer orders</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        {orderType === 'custom' && <Palette className="h-8 w-8 text-orange-500" />}
+                        {orderType === 'regular' && <ShoppingCart className="h-8 w-8 text-blue-500" />}
+                        {orderType === 'all' && <Package className="h-8 w-8 text-gray-500" />}
+                        <h1 className={`text-3xl font-bold ${
+                            orderType === 'custom' ? 'text-orange-700' :
+                            orderType === 'regular' ? 'text-blue-700' :
+                            'text-gray-900'
+                        }`}>
+                            {orderType === 'custom' ? '🎨 Custom T-Shirt Orders' :
+                             orderType === 'regular' ? 'Regular Orders' :
+                             'All Orders'}
+                        </h1>
+                    </div>
+                    <p className="text-gray-600">
+                        {orderType === 'custom' ? 'Manage custom designed t-shirt orders' :
+                         orderType === 'regular' ? 'Manage regular product orders' :
+                         'View and manage all customer orders'}
+                    </p>
                 </div>
 
                 {/* Search and Filter Section */}
@@ -157,10 +181,17 @@ export default function AdminOrdersIndex({ orders, filters }) {
                                             <tr key={order.id} className="border-b hover:bg-gray-50">
                                                 <td className="py-4 px-4">
                                                     <div>
-                                                        <p className="font-medium">#{order.order_number}</p>
+                                                        <p className={`font-medium ${order.order_type === 'custom' ? 'text-orange-700' : ''}`}>
+                                                            {order.order_type === 'custom' ? '🎨 ' : ''}#{order.order_number}
+                                                        </p>
                                                         <p className="text-sm text-gray-600">
                                                             ID: {order.id}
                                                         </p>
+                                                        {order.order_type === 'custom' && (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mt-1">
+                                                                Custom T-Shirt
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </td>
                                                 <td className="py-4 px-4">
@@ -181,7 +212,7 @@ export default function AdminOrdersIndex({ orders, filters }) {
                                                 <td className="py-4 px-4">
                                                     <div className="flex items-center gap-2">
                                                         <DollarSign className="h-4 w-4 text-gray-400" />
-                                                        <span className="font-medium">${order.total_amount}</span>
+                                                        <span className="font-medium">{order.total_amount} DH</span>
                                                     </div>
                                                 </td>
                                                 <td className="py-4 px-4">

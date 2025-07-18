@@ -26,11 +26,11 @@ export default function AdminProductCreate({ categories }) {
     return (
         <AdminLayout>
             <Head title="Add Product" />
-            
-            <div className="container mx-auto px-4 py-8">
+
+            <div className="container flex flex-col items-center justify-center w-full  px-4 py-8">
                 {/* Breadcrumb */}
                 <div className="mb-6">
-                    <Link 
+                    <Link
                         href={route('admin.products.index')}
                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
                     >

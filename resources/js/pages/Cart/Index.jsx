@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { ImageModal } from '@/components/image-modal';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 
 export default function CartIndex({ cartItems, total, auth }) {
@@ -96,8 +98,36 @@ export default function CartIndex({ cartItems, total, auth }) {
                                     <CardContent className="p-6">
                                         <div className="flex gap-4">
                                             {/* Product Image */}
-                                            <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                {item.product.image ? (
+                                            <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative border border-gray-200">
+                                                {item.is_custom ? (
+                                                    <>
+                                                        {/* T-shirt base image */}
+                                                        <img
+                                                            src={`/images/${item.tshirt_image || (item.custom_color === 'black' ? 'black.jpg' : 'white.jpg')}`}
+                                                            alt={`${item.custom_color} T-shirt`}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        {/* Custom design overlay - larger and clearer */}
+                                                        {item.custom_design_path && (
+                                                            <ImageModal
+                                                                src={`/storage/${item.custom_design_path}`}
+                                                                alt={`Custom Design for ${item.custom_color} T-shirt`}
+                                                            >
+                                                                <div className="absolute inset-3 bg-white/95 rounded-md flex items-center justify-center shadow-lg border border-gray-200 hover:bg-white transition-colors">
+                                                                    <img
+                                                                        src={`/storage/${item.custom_design_path}`}
+                                                                        alt="Custom Design"
+                                                                        className="max-w-full max-h-full object-contain"
+                                                                    />
+                                                                </div>
+                                                            </ImageModal>
+                                                        )}
+                                                        {/* Custom design indicator */}
+                                                        <div className="absolute top-1 right-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">
+                                                            🎨
+                                                        </div>
+                                                    </>
+                                                ) : item.product.image ? (
                                                     <img
                                                         src={`/storage/${item.product.image}`}
                                                         alt={item.product.name}
@@ -115,16 +145,29 @@ export default function CartIndex({ cartItems, total, auth }) {
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div>
                                                         <h3 className="font-semibold text-lg">
-                                                            <Link
-                                                                href={route('products.show', item.product.id)}
-                                                                className="hover:text-blue-600 transition-colors"
-                                                            >
-                                                                {item.product.name}
-                                                            </Link>
+                                                            {item.is_custom ? (
+                                                                <span className="text-orange-600">
+                                                                    Custom T-Shirt ({item.custom_color})
+                                                                </span>
+                                                            ) : (
+                                                                <Link
+                                                                    href={route('products.show', item.product.id)}
+                                                                    className="hover:text-blue-600 transition-colors"
+                                                                >
+                                                                    {item.product.name}
+                                                                </Link>
+                                                            )}
                                                         </h3>
                                                         <p className="text-gray-600 text-sm">
-                                                            {item.product.category.name}
+                                                            {item.is_custom ? 'Custom Design' : item.product.category.name}
                                                         </p>
+                                                        {item.is_custom && (
+                                                            <div className="mt-1">
+                                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                                    🎨 Custom Design
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <Button
                                                         variant="ghost"
@@ -173,10 +216,13 @@ export default function CartIndex({ cartItems, total, auth }) {
                                                     {/* Price */}
                                                     <div className="text-right">
                                                         <p className="text-lg font-semibold">
-                                                            {(item.product.price * item.quantity).toFixed(2)} DH
+                                                            {item.is_custom
+                                                                ? (item.custom_price * item.quantity).toFixed(2)
+                                                                : (item.product.price * item.quantity).toFixed(2)
+                                                            } DH
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            {item.product.price} DH each
+                                                            {item.is_custom ? item.custom_price : item.product.price} DH each
                                                         </p>
                                                     </div>
                                                 </div>

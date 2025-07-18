@@ -25,6 +25,7 @@ class Order extends Model
         'billing_address',
         'phone',
         'notes',
+        'order_type',
     ];
 
     /**

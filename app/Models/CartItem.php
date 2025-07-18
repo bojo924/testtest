@@ -20,6 +20,11 @@ class CartItem extends Model
         'product_id',
         'quantity',
         'session_id',
+        'is_custom',
+        'custom_color',
+        'custom_design_path',
+        'custom_price',
+        'tshirt_image',
     ];
 
     /**
@@ -31,6 +36,8 @@ class CartItem extends Model
     {
         return [
             'quantity' => 'integer',
+            'is_custom' => 'boolean',
+            'custom_price' => 'decimal:2',
         ];
     }
 
@@ -55,7 +62,8 @@ class CartItem extends Model
      */
     public function getTotalPriceAttribute(): float
     {
-        return $this->quantity * $this->product->price;
+        $price = $this->is_custom ? $this->custom_price : $this->product->price;
+        return $this->quantity * $price;
     }
 
     /**

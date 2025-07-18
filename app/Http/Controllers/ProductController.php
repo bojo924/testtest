@@ -16,7 +16,8 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with('category')
+            ->where('name', '!=', 'Custom T-Shirt'); // Exclude the base custom t-shirt product
 
         // Search functionality
         if ($request->has('search') && $request->search) {

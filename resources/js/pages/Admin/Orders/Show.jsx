@@ -1,18 +1,20 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { AdminLayout } from '@/components/admin-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { 
-    ArrowLeft, 
-    User, 
-    MapPin, 
-    Phone, 
+import {
+    ArrowLeft,
+    User,
+    MapPin,
+    Phone,
     Calendar,
     Package,
-    DollarSign
+    DollarSign,
+    Palette
 } from 'lucide-react';
 
 export default function AdminOrderShow({ order }) {
@@ -54,11 +56,11 @@ export default function AdminOrderShow({ order }) {
     return (
         <AdminLayout>
             <Head title={`Order #${order.order_number}`} />
-            
+
             <div className="container mx-auto px-4 py-8">
                 {/* Breadcrumb */}
                 <div className="mb-6">
-                    <Link 
+                    <Link
                         href={route('admin.orders.index')}
                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
                     >
@@ -71,9 +73,19 @@ export default function AdminOrderShow({ order }) {
                 <div className="mb-8">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                Order #{order.order_number}
-                            </h1>
+                            <div className="flex items-center gap-3 mb-2">
+                                {order.order_type === 'custom' && <Palette className="h-8 w-8 text-orange-500" />}
+                                <h1 className={`text-3xl font-bold ${order.order_type === 'custom' ? 'text-orange-700' : 'text-gray-900'}`}>
+                                    {order.order_type === 'custom' ? '🎨 ' : ''}Order #{order.order_number}
+                                </h1>
+                            </div>
+                            {order.order_type === 'custom' && (
+                                <div className="mb-3">
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                        Custom T-Shirt Order
+                                    </span>
+                                </div>
+                            )}
                             <div className="flex items-center gap-4 text-sm text-gray-600">
                                 <div className="flex items-center gap-1">
                                     <Calendar className="h-4 w-4" />
@@ -81,7 +93,7 @@ export default function AdminOrderShow({ order }) {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <DollarSign className="h-4 w-4" />
-                                    ${order.total_amount}
+                                    {order.total_amount} DH
                                 </div>
                             </div>
                         </div>
@@ -107,9 +119,36 @@ export default function AdminOrderShow({ order }) {
                             <CardContent>
                                 <div className="space-y-4">
                                     {order.order_items.map((item) => (
-                                        <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                {item.product_image ? (
+                                        <div key={item.id} className={`flex items-center gap-4 p-4 border rounded-lg ${
+                                            item.is_custom ? 'border-orange-200 bg-orange-25' : ''
+                                        }`}>
+                                            <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative border border-gray-200">
+                                                {item.is_custom ? (
+                                                    <>
+                                                        {/* T-shirt base */}
+                                                        <img
+                                                            src={`/images/${item.custom_color === 'black' ? 'black.jpg' : 'white.jpg'}`}
+                                                            alt={`${item.custom_color} T-shirt`}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        {/* Custom design overlay - larger and clearer for admin */}
+                                                        {item.custom_design_path && (
+                                                            <div className="absolute inset-2 bg-white/95 rounded flex items-center justify-center shadow-lg border border-gray-200">
+                                                                <img
+                                                                    src={`/storage/${item.custom_design_path}`}
+                                                                    alt="Custom Design"
+                                                                    className="max-w-full max-h-full object-contain cursor-pointer"
+                                                                    onClick={() => window.open(`/storage/${item.custom_design_path}`, '_blank')}
+                                                                    title="Click to view full size"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        {/* Custom indicator */}
+                                                        <div className="absolute top-1 right-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">
+                                                            🎨
+                                                        </div>
+                                                    </>
+                                                ) : item.product_image ? (
                                                     <img
                                                         src={`/storage/${item.product_image}`}
                                                         alt={item.product_name}
@@ -122,22 +161,31 @@ export default function AdminOrderShow({ order }) {
                                                 )}
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="font-medium">{item.product_name}</h4>
+                                                <h4 className={`font-medium ${item.is_custom ? 'text-orange-800' : ''}`}>
+                                                    {item.product_name}
+                                                </h4>
                                                 <p className="text-sm text-gray-600">
-                                                    Quantity: {item.quantity} × ${item.price}
+                                                    Quantity: {item.quantity} × {item.price} DH
                                                 </p>
+                                                {item.is_custom && (
+                                                    <div className="mt-1">
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                            🎨 Custom Design • {item.custom_color} T-shirt
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="text-right">
                                                 <p className="font-medium">
-                                                    ${(item.quantity * item.price).toFixed(2)}
+                                                    {(item.quantity * item.price).toFixed(2)} DH
                                                 </p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                
+
                                 <Separator className="my-4" />
-                                
+
                                 <div className="space-y-2">
                                     <div className="flex justify-between">
                                         <span>Subtotal</span>

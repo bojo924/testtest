@@ -56,16 +56,14 @@ class CartController extends Controller
                         ->with('error', 'Not enough stock available.');
                 }
                 $cartItem->update(['quantity' => $newQuantity]);
-                // Decrease stock by the added quantity
-                $product->decrement('stock', $quantity);
+                // Don't decrement stock here - only reserve when order is placed
             } else {
                 CartItem::create([
                     'user_id' => Auth::id(),
                     'product_id' => $product->id,
                     'quantity' => $quantity
                 ]);
-                // Decrease stock by the added quantity
-                $product->decrement('stock', $quantity);
+                // Don't decrement stock here - only reserve when order is placed
             }
         } else {
             // For guests, store in session
@@ -79,15 +77,13 @@ class CartController extends Controller
                         ->with('error', 'Not enough stock available.');
                 }
                 $cart[$productId]['quantity'] = $newQuantity;
-                // Decrease stock by the added quantity
-                $product->decrement('stock', $quantity);
+                // Don't decrement stock here - only reserve when order is placed
             } else {
                 $cart[$productId] = [
                     'product_id' => $product->id,
                     'quantity' => $quantity
                 ];
-                // Decrease stock by the added quantity
-                $product->decrement('stock', $quantity);
+                // Don't decrement stock here - only reserve when order is placed
             }
 
             session()->put('cart', $cart);
@@ -108,26 +104,15 @@ class CartController extends Controller
 
         $quantity = $request->quantity;
         $product = $cartItem->product;
-        $oldQuantity = $cartItem->quantity;
-        $quantityDifference = $quantity - $oldQuantity;
 
-        // Check stock availability (current stock + what we're returning - what we're taking)
-        $availableStock = $product->stock + $oldQuantity;
-        if ($availableStock < $quantity) {
+        // Check stock availability
+        if ($product->stock < $quantity) {
             return redirect()->back()
                 ->with('error', 'Not enough stock available.');
         }
 
         $cartItem->update(['quantity' => $quantity]);
-
-        // Adjust stock based on quantity change
-        if ($quantityDifference > 0) {
-            // Quantity increased, decrease stock
-            $product->decrement('stock', $quantityDifference);
-        } elseif ($quantityDifference < 0) {
-            // Quantity decreased, increase stock
-            $product->increment('stock', abs($quantityDifference));
-        }
+        // Don't adjust stock here - only when order is placed
 
         return redirect()->back()
             ->with('success', 'Cart updated successfully.');
@@ -146,27 +131,15 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         if (isset($cart[$product->id])) {
-            $oldQuantity = $cart[$product->id]['quantity'];
-            $quantityDifference = $quantity - $oldQuantity;
-
-            // Check stock availability (current stock + what we're returning - what we're taking)
-            $availableStock = $product->stock + $oldQuantity;
-            if ($availableStock < $quantity) {
+            // Check stock availability
+            if ($product->stock < $quantity) {
                 return redirect()->back()
                     ->with('error', 'Not enough stock available.');
             }
 
             $cart[$product->id]['quantity'] = $quantity;
             session()->put('cart', $cart);
-
-            // Adjust stock based on quantity change
-            if ($quantityDifference > 0) {
-                // Quantity increased, decrease stock
-                $product->decrement('stock', $quantityDifference);
-            } elseif ($quantityDifference < 0) {
-                // Quantity decreased, increase stock
-                $product->increment('stock', abs($quantityDifference));
-            }
+            // Don't adjust stock here - only when order is placed
         }
 
         return redirect()->back()
@@ -178,9 +151,7 @@ class CartController extends Controller
      */
     public function remove(CartItem $cartItem)
     {
-        // Restore stock when item is removed
-        $cartItem->product->increment('stock', $cartItem->quantity);
-
+        // No need to restore stock since it wasn't decremented when added to cart
         $cartItem->delete();
 
         return redirect()->back()
@@ -194,12 +165,7 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        // Restore stock when item is removed
-        if (isset($cart[$product->id])) {
-            $quantity = $cart[$product->id]['quantity'];
-            $product->increment('stock', $quantity);
-        }
-
+        // No need to restore stock since it wasn't decremented when added to cart
         unset($cart[$product->id]);
         session()->put('cart', $cart);
 
@@ -248,14 +214,28 @@ class CartController extends Controller
             $cart = session()->get('cart', []);
             $cartItems = collect();
 
-            foreach ($cart as $item) {
+            foreach ($cart as $key => $item) {
                 $product = Product::with('category')->find($item['product_id']);
                 if ($product) {
-                    $cartItems->push((object) [
-                        'id' => $item['product_id'],
+                    $cartItem = (object) [
+                        'id' => $key,
                         'product' => $product,
-                        'quantity' => $item['quantity']
-                    ]);
+                        'quantity' => $item['quantity'],
+                        'is_custom' => $item['is_custom'] ?? false,
+                        'custom_color' => $item['custom_color'] ?? null,
+                        'custom_design_path' => $item['custom_design_path'] ?? null,
+                        'custom_price' => $item['custom_price'] ?? null,
+                        'tshirt_image' => $item['tshirt_image'] ?? null,
+                    ];
+
+                    // Add total_price property for custom items
+                    if ($cartItem->is_custom) {
+                        $cartItem->total_price = $cartItem->quantity * $cartItem->custom_price;
+                    } else {
+                        $cartItem->total_price = $cartItem->quantity * $product->price;
+                    }
+
+                    $cartItems->push($cartItem);
                 }
             }
 

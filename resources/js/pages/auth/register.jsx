@@ -7,7 +7,6 @@ import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
@@ -98,26 +97,14 @@ export default function Register() {
                         <InputError message={errors.password_confirmation} />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="role">Account Type</Label>
-                        <Select value={data.role} onValueChange={(value) => setData('role', value)}>
-                            <SelectTrigger tabIndex={5}>
-                                <SelectValue placeholder="Select account type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="customer">Customer</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <InputError message={errors.role} />
-                    </div>
+
 
                     <div className="grid gap-2">
                         <Label htmlFor="phone">Phone Number (Optional)</Label>
                         <Input
                             id="phone"
                             type="tel"
-                            tabIndex={6}
+                            tabIndex={5}
                             autoComplete="tel"
                             value={data.phone}
                             onChange={(e) => setData('phone', e.target.value)}
@@ -132,7 +119,7 @@ export default function Register() {
                         <Input
                             id="address"
                             type="text"
-                            tabIndex={7}
+                            tabIndex={6}
                             autoComplete="street-address"
                             value={data.address}
                             onChange={(e) => setData('address', e.target.value)}
@@ -142,7 +129,7 @@ export default function Register() {
                         <InputError message={errors.address} />
                     </div>
 
-                    <Button type="submit" className="mt-2 w-full" tabIndex={8} disabled={processing}>
+                    <Button type="submit" className="mt-2 w-full" tabIndex={7} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Create account
                     </Button>
@@ -150,7 +137,7 @@ export default function Register() {
 
                 <div className="text-center text-sm text-muted-foreground">
                     Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={9}>
+                    <TextLink href={route('login')} tabIndex={8}>
                         Log in
                     </TextLink>
                 </div>

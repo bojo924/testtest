@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { Button } from '@/components/ui/button';
 import {
     LayoutDashboard,
@@ -13,7 +14,8 @@ import {
     ChevronDown,
     ChevronRight,
     Home,
-    Tag
+    Tag,
+    Palette
 } from 'lucide-react';
 
 export function AdminSidebar() {
@@ -66,37 +68,35 @@ export function AdminSidebar() {
                 { label: 'Add Product', route: 'admin.products.create' }
             ]
         },
-        {
-            key: 'categories',
-            label: 'Categories',
-            icon: Tag,
-            expandable: true,
-            active: url && url.includes('/admin/categories'),
-            children: [
-                { label: 'All Categories', route: 'admin.categories.index' },
-                { label: 'Add Category', route: 'admin.categories.create' }
-            ]
-        },
+
         {
             key: 'orders',
             label: 'Orders',
             icon: ShoppingCart,
-            route: 'admin.orders.index',
-            active: url && url.includes('/admin/orders')
+            expandable: true,
+            active: url && url.includes('/admin/orders'),
+            children: [
+                { label: 'All Orders', route: 'admin.orders.index' },
+                { label: 'Regular Orders', route: 'admin.orders.regular' },
+                { label: 'Custom T-Shirts', route: 'admin.orders.custom' }
+            ]
         }
     ];
 
     return (
-        <div className={`bg-gray-900 text-white h-screen flex flex-col transition-all duration-300 ${
+        <div className={`bg-black text-white h-screen flex flex-col transition-all duration-300 ${
             isCollapsed ? 'w-16' : 'w-64'
         }`}>
             {/* Header */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-4 border-b border-gray-800">
                 <div className="flex items-center justify-between">
                     {!isCollapsed && (
                         <div className="flex items-center space-x-2">
-                            <Package className="h-8 w-8 text-blue-400" />
-                            <span className="text-xl font-bold">Admin Panel</span>
+                            <Package className="h-8 w-8 text-orange-500" />
+                            <div>
+                                <span className="text-xl font-bold text-orange-500">CLICKTEE</span>
+                                <p className="text-xs text-gray-400">Admin Panel</p>
+                            </div>
                         </div>
                     )}
                     <Button
@@ -135,7 +135,7 @@ export function AdminSidebar() {
                                     onClick={() => toggleMenu(item.key)}
                                     className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                                         item.active
-                                            ? 'bg-blue-600 text-white'
+                                            ? 'bg-orange-600 text-white'
                                             : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                                     }`}
                                 >
@@ -164,7 +164,7 @@ export function AdminSidebar() {
                                                             return false;
                                                         }
                                                     })()
-                                                        ? 'bg-blue-500 text-white'
+                                                        ? 'bg-orange-500 text-white'
                                                         : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                                                 }`}
                                             >
@@ -179,7 +179,7 @@ export function AdminSidebar() {
                                 href={route(item.route)}
                                 className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                                     item.active
-                                        ? 'bg-blue-600 text-white'
+                                        ? 'bg-orange-600 text-white'
                                         : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                                 }`}
                             >

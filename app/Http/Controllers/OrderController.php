@@ -18,13 +18,21 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::with('orderItems.product')
-                      ->where('user_id', Auth::id())
-                      ->latest()
-                      ->paginate(10);
+        $regularOrders = Order::with('orderItems.product')
+                             ->where('user_id', Auth::id())
+                             ->where('order_type', 'regular')
+                             ->latest()
+                             ->paginate(5, ['*'], 'regular_page');
+
+        $customOrders = Order::with('orderItems.product')
+                            ->where('user_id', Auth::id())
+                            ->where('order_type', 'custom')
+                            ->latest()
+                            ->paginate(5, ['*'], 'custom_page');
 
         return Inertia::render('Orders/Index', [
-            'orders' => $orders
+            'regularOrders' => $regularOrders,
+            'customOrders' => $customOrders
         ]);
     }
 
@@ -80,10 +88,20 @@ class OrderController extends Controller
 
         // Calculate total
         $total = $cartItems->sum(function ($item) {
+            if (isset($item->is_custom) && $item->is_custom) {
+                return $item->quantity * $item->custom_price;
+            }
             return $item->quantity * $item->product->price;
         });
 
         DB::transaction(function () use ($request, $cartItems, $total) {
+            // Determine order type based on cart items
+            $hasCustomItems = $cartItems->contains(function ($item) {
+                return isset($item->is_custom) && $item->is_custom;
+            });
+
+            $orderType = $hasCustomItems ? 'custom' : 'regular';
+
             // Create order
             $order = Order::create([
                 'user_id' => Auth::id(),
@@ -93,33 +111,45 @@ class OrderController extends Controller
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address,
                 'phone' => $request->phone,
-                'notes' => $request->notes
+                'notes' => $request->notes,
+                'order_type' => $orderType
             ]);
 
-            // Create order items and update stock
+            // Create order items and decrement stock
             foreach ($cartItems as $cartItem) {
                 $product = $cartItem->product;
+                $isCustom = isset($cartItem->is_custom) && $cartItem->is_custom;
 
-                // Check stock availability
-                if ($product->stock < $cartItem->quantity) {
-                    throw new \Exception("Not enough stock for product: {$product->name}");
+                // Check stock availability for regular products
+                if (!$isCustom && $product->stock < $cartItem->quantity) {
+                    throw new \Exception("Insufficient stock for product: {$product->name}");
                 }
 
                 // Create order item
-                OrderItem::create([
+                $orderItemData = [
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'quantity' => $cartItem->quantity,
-                    'price' => $product->price,
-                    'product_name' => $product->name,
-                    'product_image' => $product->image
-                ]);
+                    'price' => $isCustom ? $cartItem->custom_price : $product->price,
+                    'product_name' => $isCustom ? "Custom T-Shirt ({$cartItem->custom_color})" : $product->name,
+                    'product_image' => $product->image,
+                    'is_custom' => $isCustom,
+                ];
 
-                // Update product stock
-                $product->decrement('stock', $cartItem->quantity);
+                if ($isCustom) {
+                    $orderItemData['custom_color'] = $cartItem->custom_color;
+                    $orderItemData['custom_design_path'] = $cartItem->custom_design_path;
+                }
+
+                OrderItem::create($orderItemData);
+
+                // Decrement stock only for regular products (custom t-shirts don't use stock)
+                if (!$isCustom) {
+                    $product->decrement('stock', $cartItem->quantity);
+                }
             }
 
-            // Clear cart
+            // Clear cart (don't restore stock since order is confirmed)
             if (Auth::check()) {
                 CartItem::where('user_id', Auth::id())->delete();
             } else {
@@ -161,14 +191,21 @@ class OrderController extends Controller
             $cart = session()->get('cart', []);
             $cartItems = collect();
 
-            foreach ($cart as $item) {
+            foreach ($cart as $key => $item) {
                 $product = Product::with('category')->find($item['product_id']);
                 if ($product) {
-                    $cartItems->push((object) [
-                        'id' => $item['product_id'],
+                    $cartItem = (object) [
+                        'id' => $key,
                         'product' => $product,
-                        'quantity' => $item['quantity']
-                    ]);
+                        'quantity' => $item['quantity'],
+                        'is_custom' => $item['is_custom'] ?? false,
+                        'custom_color' => $item['custom_color'] ?? null,
+                        'custom_design_path' => $item['custom_design_path'] ?? null,
+                        'custom_price' => $item['custom_price'] ?? null,
+                        'tshirt_image' => $item['tshirt_image'] ?? null,
+                    ];
+
+                    $cartItems->push($cartItem);
                 }
             }
 

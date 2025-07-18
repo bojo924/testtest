@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DesignController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,10 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+
+// Design routes
+Route::get('/custom-tshirt', [DesignController::class, 'tshirt'])->name('custom.tshirt');
+Route::post('/custom-tshirt/add-to-cart', [DesignController::class, 'addToCart'])->name('custom.tshirt.add-to-cart');
 
 // Cart routes (accessible to guests and authenticated users)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -53,6 +58,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     // Order management
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/regular', [AdminOrderController::class, 'regular'])->name('orders.regular');
+    Route::get('/orders/custom', [AdminOrderController::class, 'custom'])->name('orders.custom');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
 });

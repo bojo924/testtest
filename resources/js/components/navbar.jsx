@@ -26,7 +26,7 @@ export function Navbar() {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link href={route('home')} className="flex items-center space-x-2">
+                    <Link href={route('home')} className="flex items-center space-x-3">
                         <img
                             src="/images/Picsart_25-06-27_11-57-09-084.png"
                             alt="ClickTee"
@@ -36,8 +36,11 @@ export function Navbar() {
                                 e.target.nextSibling.style.display = 'flex';
                             }}
                         />
+                        <span className="text-3xl font-bold text-orange-500 tracking-tight">
+                            CLICKTEE
+                        </span>
                     </Link>
-                    
+
 
                     {/* Desktop Navigation */}
                     {/* <div className="hidden md:flex items-center space-x-8">

@@ -54,47 +54,65 @@ export default function ProductsIndex({ products, categories, filters }) {
             <Head title="Products" />
 
             {/* Hero Section */}
-            <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
                 <div className="relative container mx-auto px-6 py-12">
-                    <div className="text-center max-w-3xl mx-auto">
-                        <div className="mb-4">
-                            <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                                ✨ Premium Collection
+                    <div className="text-center max-w-4xl mx-auto">
+                        <div className="mb-6">
+                            <span className="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                                🎨 Design & Shop
                             </span>
                         </div>
 
-                        <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+                        <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                             Discover Amazing
-                            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Products</span>
+                            <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent"> Products</span>
+                            <br />
+                            <span className="text-2xl md:text-3xl text-gray-700">& Design Custom T-Shirts</span>
                         </h1>
 
                         <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
-                            Find premium quality items that match your style and lifestyle
+                            Shop premium quality items or create your own custom t-shirt designs
                         </p>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                            <Link
+                                href={route('custom.tshirt')}
+                                className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-lg"
+                            >
+                                🎽 Design Custom T-Shirt
+                            </Link>
+                            <button
+                                className="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-300 hover:border-orange-500 hover:bg-orange-50 text-gray-900 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-lg"
+                                onClick={() => document.getElementById('products-section').scrollIntoView({ behavior: 'smooth' })}
+                            >
+                                Browse Products
+                            </button>
+                        </div>
 
                         {/* Quick Search */}
                         <div className="max-w-xl mx-auto">
                             <div className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
                                 <div className="relative bg-white rounded-xl shadow-lg border border-gray-200">
-                                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                                     <Input
                                         type="text"
                                         placeholder="Search products..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-12 pr-24 py-3 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 bg-transparent"
+                                        className="pl-12 pr-28 py-8 border-0 rounded-xl focus:ring-2 focus:ring-orange-500 bg-transparent text-base"
                                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                     />
-                                    <Button
+                                    <button
                                         onClick={handleSearch}
-                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2.5 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
                                     >
                                         Search
-                                    </Button>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -102,18 +120,28 @@ export default function ProductsIndex({ products, categories, filters }) {
                 </div>
 
                 {/* Decorative Elements */}
-                <div className="absolute top-8 left-8 w-12 h-12 bg-blue-200 rounded-full opacity-30 animate-pulse"></div>
-                <div className="absolute bottom-8 right-8 w-16 h-16 bg-purple-200 rounded-full opacity-30 animate-pulse delay-1000"></div>
-                <div className="absolute top-1/2 right-12 w-8 h-8 bg-indigo-200 rounded-full opacity-30 animate-pulse delay-500"></div>
+                <div className="absolute top-8 left-8 w-12 h-12 bg-orange-200 rounded-full opacity-30 animate-pulse"></div>
+                <div className="absolute bottom-8 right-8 w-16 h-16 bg-gray-200 rounded-full opacity-30 animate-pulse delay-1000"></div>
+                <div className="absolute top-1/2 right-12 w-8 h-8 bg-orange-300 rounded-full opacity-30 animate-pulse delay-500"></div>
             </div>
 
-            <div className="container mx-auto px-6 py-8">
+            <div id="products-section" className="container mx-auto px-6 py-8">
                 {/* Filter Bar */}
                 <div className="bg-white rounded-xl shadow-sm border p-6 mb-8 mx-4 md:mx-0">
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4 text-gray-500" />
-                            <span className="font-medium text-gray-700">Filters:</span>
+                            <Filter className="h-4 w-4 text-orange-500" />
+                            <span className="font-medium text-gray-900">Filters:</span>
+                        </div>
+
+                        {/* Custom T-Shirt Quick Access */}
+                        <div className="hidden sm:flex items-center gap-2 ml-auto">
+                            <Link
+                                href={route('custom.tshirt')}
+                                className="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+                            >
+                                🎨 Design your  T-Shirt
+                            </Link>
                         </div>
 
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -166,11 +194,20 @@ export default function ProductsIndex({ products, categories, filters }) {
                             </SelectContent>
                         </Select>
 
-                        <div className="flex gap-2 ml-auto">
-                            <Button onClick={handleSearch} size="sm">
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={handleSearch}
+                                size="sm"
+                                className="bg-orange-500 hover:bg-orange-600 text-white"
+                            >
                                 Apply
                             </Button>
-                            <Button variant="outline" onClick={clearFilters} size="sm">
+                            <Button
+                                variant="outline"
+                                onClick={clearFilters}
+                                size="sm"
+                                className="border-gray-300 hover:border-orange-500 hover:bg-orange-50 text-gray-900"
+                            >
                                 Clear
                             </Button>
                         </div>
@@ -258,7 +295,7 @@ export default function ProductsIndex({ products, categories, filters }) {
 
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
-                                        <span className="text-2xl font-bold text-blue-600">
+                                        <span className="text-2xl font-bold text-orange-500">
                                             {product.price} DH
                                         </span>
                                     </div>
@@ -283,7 +320,7 @@ export default function ProductsIndex({ products, categories, filters }) {
                                 <Button
                                     onClick={() => addToCart(product.id)}
                                     disabled={product.stock === 0}
-                                    className="w-full flex items-center gap-2 rounded-xl py-3 font-medium transition-all duration-200 hover:shadow-lg"
+                                    className="w-full flex items-center bg-orange-500 gap-2 rounded-xl py-3 font-medium transition-all duration-200 hover:shadow-lg"
                                     size="lg"
                                 >
                                     <ShoppingCart className="h-4 w-4" />
